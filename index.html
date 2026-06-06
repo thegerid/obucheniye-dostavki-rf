@@ -136,8 +136,6 @@
       display: grid;
       place-items: center;
       cursor: pointer;
-      --orbit-one-duration: 18s;
-      --orbit-two-duration: 12s;
     }
 
     .orbit-scene::before,
@@ -224,26 +222,18 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      animation: spin var(--orbit-one-duration) linear infinite;
       transform-origin: center;
       will-change: transform, opacity, filter;
       transition: filter 220ms ease, opacity 220ms ease;
     }
 
+    .orbit.one {
+      transform: rotate(var(--orbit-one-angle, 0deg));
+    }
+
     .orbit.two {
       inset: 34px;
-      animation-duration: var(--orbit-two-duration);
-      animation-direction: reverse;
-    }
-
-    .orbit-scene:hover .orbit.one,
-    .orbit-scene:focus-within .orbit.one {
-      --orbit-one-duration: 6.5s;
-    }
-
-    .orbit-scene:hover .orbit.two,
-    .orbit-scene:focus-within .orbit.two {
-      --orbit-two-duration: 4.4s;
+      transform: rotate(var(--orbit-two-angle, 0deg));
     }
 
     .logo {
@@ -307,45 +297,38 @@
     .orbit.two .logo.b { transform: rotate(150deg) translateY(-126px) rotate(-150deg); }
     .orbit.two .logo.c { transform: rotate(270deg) translateY(-126px) rotate(-270deg); }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
     body.is-launching {
       overflow: hidden;
     }
 
     body.is-launching .orbit-scene {
-      --orbit-one-duration: 0.34s;
-      --orbit-two-duration: 0.23s;
       pointer-events: none;
     }
 
     body.is-launching .orbit.one,
     body.is-launching .orbit.two {
-      filter: blur(7px);
-      opacity: 0.94;
+      filter: blur(4px) saturate(1.08);
+      opacity: 1;
     }
 
     body.is-launching .logo {
-      opacity: 0.04;
-      transition: opacity 560ms linear, filter 560ms linear;
-      filter: blur(6px);
+      opacity: 0.3;
+      transition: opacity 620ms linear, filter 620ms linear;
+      filter: blur(3px);
     }
 
     body.is-launching .speed-ring {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
-      filter: blur(3px);
+      filter: blur(1.6px);
     }
 
     body.is-launching .speed-ring.outer {
-      opacity: 0.92;
+      opacity: 0.96;
     }
 
     body.is-launching .speed-ring.inner {
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     body.is-launching .core-link {
@@ -434,10 +417,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .orbit,
       .core-link,
       .speed-ring {
-        animation: none;
         transition: none;
       }
     }
@@ -486,12 +467,58 @@
     (() => {
       const orbitScene = document.querySelector(".orbit-scene");
       const coreLink = document.querySelector(".core-link");
+      const orbitOne = document.querySelector(".orbit.one");
+      const orbitTwo = document.querySelector(".orbit.two");
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      if (!orbitScene || !coreLink) {
+      if (!orbitScene || !coreLink || !orbitOne || !orbitTwo) {
         return;
       }
 
       let isLaunching = false;
+      let isHovering = false;
+      let rafId = 0;
+      let lastTs = 0;
+
+      const baseSpeed = { one: 20, two: -30 };
+      const hoverSpeed = { one: 55, two: -82 };
+      const launchSpeed = { one: 1200, two: -1760 };
+      const currentSpeed = { ...baseSpeed };
+      const targetSpeed = { ...baseSpeed };
+      const angle = { one: 0, two: 0 };
+
+      function setHoverState(nextHover) {
+        if (isLaunching || prefersReducedMotion) {
+          return;
+        }
+
+        isHovering = nextHover;
+        targetSpeed.one = nextHover ? hoverSpeed.one : baseSpeed.one;
+        targetSpeed.two = nextHover ? hoverSpeed.two : baseSpeed.two;
+      }
+
+      function tick(ts) {
+        if (!lastTs) {
+          lastTs = ts;
+        }
+
+        const dt = Math.min(34, ts - lastTs);
+        lastTs = ts;
+
+        const response = isLaunching ? 0.016 : isHovering ? 0.0095 : 0.0065;
+        const alpha = 1 - Math.exp(-dt * response);
+
+        currentSpeed.one += (targetSpeed.one - currentSpeed.one) * alpha;
+        currentSpeed.two += (targetSpeed.two - currentSpeed.two) * alpha;
+
+        angle.one = (angle.one + currentSpeed.one * dt / 1000) % 360;
+        angle.two = (angle.two + currentSpeed.two * dt / 1000) % 360;
+
+        orbitOne.style.setProperty("--orbit-one-angle", `${angle.one}deg`);
+        orbitTwo.style.setProperty("--orbit-two-angle", `${angle.two}deg`);
+
+        rafId = window.requestAnimationFrame(tick);
+      }
 
       function launch(event) {
         if (isLaunching) {
@@ -501,12 +528,23 @@
 
         isLaunching = true;
         event.preventDefault();
+        targetSpeed.one = launchSpeed.one;
+        targetSpeed.two = launchSpeed.two;
         document.body.classList.add("is-launching");
 
         window.setTimeout(() => {
           window.location.assign(coreLink.href);
-        }, 720);
+        }, 860);
       }
+
+      if (!prefersReducedMotion) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+
+      orbitScene.addEventListener("mouseenter", () => setHoverState(true));
+      orbitScene.addEventListener("mouseleave", () => setHoverState(false));
+      orbitScene.addEventListener("focusin", () => setHoverState(true));
+      orbitScene.addEventListener("focusout", () => setHoverState(false));
 
       coreLink.addEventListener("click", launch);
 
@@ -521,6 +559,12 @@
       coreLink.addEventListener("keydown", (event) => {
         if (event.key === " " || event.key === "Spacebar") {
           launch(event);
+        }
+      });
+
+      window.addEventListener("beforeunload", () => {
+        if (rafId) {
+          window.cancelAnimationFrame(rafId);
         }
       });
     })();
