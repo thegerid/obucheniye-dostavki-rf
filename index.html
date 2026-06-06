@@ -196,6 +196,11 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.96);
     }
 
+    .orbit-scene:hover .core-link,
+    .orbit-scene:focus-within .core-link {
+      animation: corePulse 920ms ease-in-out infinite;
+    }
+
     .core-link:focus-visible {
       outline: 3px solid rgba(245, 49, 31, 0.22);
       outline-offset: 5px;
@@ -296,6 +301,23 @@
     .orbit.two .logo.a { transform: rotate(30deg) translateY(-126px) rotate(-30deg); }
     .orbit.two .logo.b { transform: rotate(150deg) translateY(-126px) rotate(-150deg); }
     .orbit.two .logo.c { transform: rotate(270deg) translateY(-126px) rotate(-270deg); }
+
+    @keyframes corePulse {
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow:
+          0 22px 54px rgba(245, 49, 31, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.96);
+      }
+
+      50% {
+        transform: scale(1.06);
+        box-shadow:
+          0 30px 74px rgba(245, 49, 31, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.96);
+      }
+    }
 
     body.is-launching {
       overflow: hidden;
@@ -420,6 +442,7 @@
       .core-link,
       .speed-ring {
         transition: none;
+        animation: none;
       }
     }
   </style>
