@@ -72,7 +72,6 @@
     }
 
     .shell {
-      position: relative;
       width: min(100%, 880px);
       padding: 32px;
       border: 1px solid rgba(255, 255, 255, 0.7);
@@ -80,8 +79,6 @@
       background: var(--panel);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
-      transform-origin: 73% 54%;
-      transition: transform 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
     }
 
     .badge {
@@ -139,6 +136,8 @@
       display: grid;
       place-items: center;
       cursor: pointer;
+      --orbit-one-duration: 18s;
+      --orbit-two-duration: 12s;
     }
 
     .orbit-scene::before,
@@ -225,25 +224,26 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      animation: spin 18s linear infinite;
+      animation: spin var(--orbit-one-duration) linear infinite;
       transform-origin: center;
       will-change: transform, opacity, filter;
+      transition: filter 220ms ease, opacity 220ms ease;
     }
 
     .orbit.two {
       inset: 34px;
-      animation-duration: 12s;
+      animation-duration: var(--orbit-two-duration);
       animation-direction: reverse;
     }
 
     .orbit-scene:hover .orbit.one,
     .orbit-scene:focus-within .orbit.one {
-      animation-duration: 6.5s;
+      --orbit-one-duration: 6.5s;
     }
 
     .orbit-scene:hover .orbit.two,
     .orbit-scene:focus-within .orbit.two {
-      animation-duration: 4.4s;
+      --orbit-two-duration: 4.4s;
     }
 
     .logo {
@@ -267,83 +267,33 @@
       display: block;
     }
 
-    .streak-ring,
-    .vortex-core {
+    .speed-ring {
       position: absolute;
       left: 50%;
       top: 50%;
+      border-radius: 50%;
       pointer-events: none;
       opacity: 0;
+      transform: translate(-50%, -50%) scale(0.96);
+      transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
     }
 
-    .streak-ring {
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0.7);
-    }
-
-    .streak-ring.outer {
+    .speed-ring.outer {
       width: 356px;
       height: 356px;
-      border: 10px solid rgba(245, 49, 31, 0.42);
+      border: 10px solid rgba(245, 49, 31, 0.32);
       box-shadow:
-        0 0 28px rgba(245, 49, 31, 0.28),
-        inset 0 0 28px rgba(245, 49, 31, 0.2);
+        0 0 28px rgba(245, 49, 31, 0.22),
+        inset 0 0 18px rgba(245, 49, 31, 0.12);
     }
 
-    .streak-ring.inner {
+    .speed-ring.inner {
       width: 254px;
       height: 254px;
-      border: 8px solid rgba(245, 49, 31, 0.34);
+      border: 8px solid rgba(245, 49, 31, 0.26);
       box-shadow:
-        0 0 22px rgba(245, 49, 31, 0.2),
-        inset 0 0 22px rgba(245, 49, 31, 0.18);
-    }
-
-    .vortex-core {
-      width: 104px;
-      height: 104px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0.18);
-      background:
-        radial-gradient(circle, #040404 0 28%, rgba(10, 10, 10, 0.98) 34%, rgba(245, 49, 31, 0.48) 50%, rgba(245, 49, 31, 0.08) 62%, rgba(255, 255, 255, 0) 76%);
-      filter: blur(0);
-    }
-
-    .event-horizon {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0;
-      z-index: 9;
-    }
-
-    .event-horizon::before,
-    .event-horizon::after {
-      content: "";
-      position: absolute;
-      left: 72%;
-      top: 54%;
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0.12);
-      opacity: 0;
-    }
-
-    .event-horizon::before {
-      width: 160px;
-      height: 160px;
-      background:
-        radial-gradient(circle, #020202 0 26%, rgba(2, 2, 2, 0.98) 34%, rgba(245, 49, 31, 0.28) 48%, rgba(245, 49, 31, 0.06) 60%, rgba(255, 255, 255, 0) 72%);
-      filter: blur(0);
-    }
-
-    .event-horizon::after {
-      inset: 0;
-      left: auto;
-      top: auto;
-      border-radius: 0;
-      transform: none;
-      background:
-        radial-gradient(circle at 72% 54%, rgba(8, 7, 9, 0) 0 6%, rgba(8, 7, 9, 0.55) 11%, rgba(8, 7, 9, 0.82) 20%, rgba(8, 7, 9, 0.96) 34%, rgba(5, 5, 6, 1) 100%);
+        0 0 22px rgba(245, 49, 31, 0.16),
+        inset 0 0 16px rgba(245, 49, 31, 0.12);
     }
 
     .logo.a { transform: rotate(0deg) translateY(-178px) rotate(0deg); }
@@ -362,216 +312,47 @@
       to { transform: rotate(360deg); }
     }
 
-    @keyframes streakOrbit {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.72) rotate(0deg);
-        filter: blur(0);
-      }
-
-      28% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 0.96;
-        transform: translate(-50%, -50%) scale(1) rotate(1080deg);
-        filter: blur(3px);
-      }
-    }
-
-    @keyframes vortexCollapse {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.18);
-        filter: blur(0);
-      }
-
-      38% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(0.92);
-        filter: blur(0);
-      }
-
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(4.8);
-        filter: blur(8px);
-      }
-    }
-
-    @keyframes orbitImplode {
-      0% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-        filter: blur(0);
-      }
-
-      58% {
-        opacity: 1;
-        transform: scale(1.04) rotate(720deg);
-        filter: blur(2px);
-      }
-
-      100% {
-        opacity: 0;
-        transform: scale(0.16) rotate(1680deg);
-        filter: blur(12px);
-      }
-    }
-
-    @keyframes logoSmear {
-      0% {
-        opacity: 1;
-        filter: blur(0);
-      }
-
-      45% {
-        opacity: 1;
-        filter: blur(1px);
-      }
-
-      100% {
-        opacity: 0;
-        filter: blur(10px);
-      }
-    }
-
-    @keyframes coreDive {
-      0% {
-        opacity: 1;
-        transform: scale(1);
-        box-shadow:
-          0 22px 54px rgba(245, 49, 31, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 0.96);
-      }
-
-      40% {
-        opacity: 1;
-        transform: scale(1.08);
-      }
-
-      100% {
-        opacity: 0;
-        transform: scale(0.1);
-        box-shadow:
-          0 0 0 rgba(245, 49, 31, 0),
-          inset 0 0 0 rgba(255, 255, 255, 0);
-      }
-    }
-
-    @keyframes shellSingularity {
-      0% {
-        opacity: 1;
-        transform: scale(1) translate3d(0, 0, 0);
-        filter: blur(0);
-      }
-
-      32% {
-        opacity: 1;
-        transform: scale(1.02) translate3d(0, 0, 0);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate3d(220px, 0, 0) scale(0.05);
-        filter: blur(18px);
-      }
-    }
-
-    @keyframes copyPull {
-      0% {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate3d(90px, -10px, 0) scale(0.92);
-      }
-    }
-
-    @keyframes horizonBloom {
-      0% {
-        opacity: 0;
-      }
-
-      18% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 1;
-      }
-    }
-
-    @keyframes horizonCore {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.14);
-        filter: blur(0);
-      }
-
-      30% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(10);
-        filter: blur(12px);
-      }
-    }
-
     body.is-launching {
       overflow: hidden;
     }
 
-    body.is-launching .shell {
-      animation: shellSingularity 1250ms cubic-bezier(0.2, 0.82, 0.14, 1) forwards;
+    body.is-launching .orbit-scene {
+      --orbit-one-duration: 0.34s;
+      --orbit-two-duration: 0.23s;
       pointer-events: none;
-    }
-
-    body.is-launching .text-block,
-    body.is-launching .badge {
-      animation: copyPull 620ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     body.is-launching .orbit.one,
     body.is-launching .orbit.two {
-      animation: orbitImplode 980ms cubic-bezier(0.26, 0.76, 0.22, 1) forwards;
+      filter: blur(7px);
+      opacity: 0.94;
     }
 
     body.is-launching .logo {
-      animation: logoSmear 780ms linear forwards;
+      opacity: 0.04;
+      transition: opacity 560ms linear, filter 560ms linear;
+      filter: blur(6px);
     }
 
-    body.is-launching .streak-ring {
-      animation: streakOrbit 920ms linear forwards;
+    body.is-launching .speed-ring {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      filter: blur(3px);
     }
 
-    body.is-launching .streak-ring.inner {
-      animation-duration: 760ms;
+    body.is-launching .speed-ring.outer {
+      opacity: 0.92;
     }
 
-    body.is-launching .vortex-core {
-      animation: vortexCollapse 1080ms cubic-bezier(0.18, 0.88, 0.16, 1) forwards;
+    body.is-launching .speed-ring.inner {
+      opacity: 0.8;
     }
 
     body.is-launching .core-link {
-      animation: coreDive 820ms cubic-bezier(0.26, 0.86, 0.18, 1) forwards;
-    }
-
-    body.is-launching .event-horizon {
-      animation: horizonBloom 1180ms ease forwards;
-    }
-
-    body.is-launching .event-horizon::before {
-      animation: horizonCore 1180ms cubic-bezier(0.16, 0.9, 0.12, 1) forwards;
-    }
-
-    body.is-launching .event-horizon::after {
-      animation: horizonBloom 780ms ease forwards;
+      transform: scale(0.96);
+      box-shadow:
+        0 14px 36px rgba(245, 49, 31, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
     }
 
     @media (max-width: 860px) {
@@ -597,11 +378,6 @@
       .lead {
         margin-left: auto;
         margin-right: auto;
-      }
-
-      .event-horizon::before {
-        left: 50%;
-        top: 66%;
       }
     }
 
@@ -646,12 +422,12 @@
       .orbit.two .logo.b { transform: rotate(150deg) translateY(-106px) rotate(-150deg); }
       .orbit.two .logo.c { transform: rotate(270deg) translateY(-106px) rotate(-270deg); }
 
-      .streak-ring.outer {
+      .speed-ring.outer {
         width: 298px;
         height: 298px;
       }
 
-      .streak-ring.inner {
+      .speed-ring.inner {
         width: 214px;
         height: 214px;
       }
@@ -660,12 +436,7 @@
     @media (prefers-reduced-motion: reduce) {
       .orbit,
       .core-link,
-      .shell,
-      .text-block,
-      .badge,
-      .streak-ring,
-      .vortex-core,
-      .event-horizon {
+      .speed-ring {
         animation: none;
         transition: none;
       }
@@ -684,9 +455,8 @@
       </div>
 
       <div class="orbit-scene">
-        <span class="streak-ring outer" aria-hidden="true"></span>
-        <span class="streak-ring inner" aria-hidden="true"></span>
-        <span class="vortex-core" aria-hidden="true"></span>
+        <span class="speed-ring outer" aria-hidden="true"></span>
+        <span class="speed-ring inner" aria-hidden="true"></span>
 
         <div class="orbit one">
           <span class="logo a"><img src="./favicon.svg" alt=""></span>
@@ -711,7 +481,6 @@
       </div>
     </section>
   </main>
-  <div class="event-horizon" aria-hidden="true"></div>
 
   <script>
     (() => {
@@ -736,7 +505,7 @@
 
         window.setTimeout(() => {
           window.location.assign(coreLink.href);
-        }, 1180);
+        }, 720);
       }
 
       coreLink.addEventListener("click", launch);
