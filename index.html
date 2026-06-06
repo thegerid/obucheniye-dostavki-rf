@@ -494,6 +494,7 @@
       const orbitOne = document.querySelector(".orbit.one");
       const orbitTwo = document.querySelector(".orbit.two");
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const canVibrate = typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
 
       if (!orbitScene || !coreLink || !orbitOne || !orbitTwo) {
         return;
@@ -558,6 +559,15 @@
         rafId = window.requestAnimationFrame(tick);
       }
 
+      function playLaunchVibration() {
+        if (!canVibrate) {
+          return;
+        }
+
+        // Start with one distinct buzz, then shorten the pauses to mimic takeoff acceleration.
+        navigator.vibrate([36, 240, 16, 170, 20, 120, 24, 86, 28, 60, 34, 42, 42, 28, 52]);
+      }
+
       function launch(event) {
         if (isLaunching) {
           event.preventDefault();
@@ -569,6 +579,7 @@
         targetSpeed.one = launchSpeed.one;
         targetSpeed.two = launchSpeed.two;
         launchStartedAt = performance.now();
+        playLaunchVibration();
         document.body.classList.add("is-launching");
 
         window.setTimeout(() => {
